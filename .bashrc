@@ -1,7 +1,10 @@
 alias k='kubectl'
 alias d='docker'
 alias dc='docker-compose'
+
 alias g='git'
+alias gs='git status -sb'
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
 
 # get current branch in git repo
 function parse_git_branch() {
