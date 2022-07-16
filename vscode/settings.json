@@ -1,0 +1,61 @@
+{
+    "python.jediEnabled": false,
+    "workbench.iconTheme": "Monokai Classic Icons",
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "files.autoSave": "onFocusChange",
+    "python.languageServer": "Pylance",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "python.showStartPage": false,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "editor.multiCursorModifier": "ctrlCmd",
+    "jupyter.sendSelectionToInteractiveWindow": false,
+    "jupyter.alwaysTrustNotebooks": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=99"
+    ],
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "explorer.confirmDragAndDrop": false,
+    "redhat.telemetry.enabled": false,
+    "terminal.integrated.tabs.enabled": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "notebook.cellToolbarLocation": {
+        "default": "right",
+        "jupyter-notebook": "left"
+    },
+    "[typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.suggest.insertMode": "replace"
+    },
+    "editor.guides.bracketPairs": true,
+    "editor.bracketPairColorization.enabled": true,
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "editor.formatOnSaveMode": "modifications",
+    "sql-formatter.dialect": "n1q1",
+    "python.formatting.provider": "none",
+    "python.formatting.autopep8Args": [
+        "--max-line-length 99"
+    ],
+    "bracketPairColorizer.depreciation-notice": false,
+    "workbench.colorTheme": "Monokai Dimmed",
+    "editor.formatOnSave": true,
+    "editor.inlineSuggest.enabled": true
+}
