@@ -32,3 +32,14 @@ function git_branch {
 }
 
 export PS1="\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
+
+# Enable autocomplete for git:
+if [ -f ~/.git-completion.bash ]; then
+  . ~/.git-completion.bash
+fi
+
+# Add VS Code `code` command to PATH
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+# Silence Mac terminal zsh message
+export BASH_SILENCE_DEPRECATION_WARNING=1
