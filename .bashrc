@@ -4,8 +4,10 @@ alias dc='docker-compose'
 
 alias g='git'
 alias gs='git status -sb'
-alias ga='git add'
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
 
 # get current branch in git repo
 function parse_git_branch() {
