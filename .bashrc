@@ -34,7 +34,7 @@ function git_branch {
   fi
 }
 
-export PS1="\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
+export PS1="\[\e]0;\W\a\]\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
 
 # Enable autocomplete for git:
 if [ -f ~/.git-completion.bash ]; then
