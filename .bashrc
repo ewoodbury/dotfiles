@@ -1,51 +1,156 @@
+# Ghostty shell integration for Bash. This must be at the very top!
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+    builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/bash/ghostty.bash"
+fi
+
 alias k='kubectl'
 alias d='docker'
 alias dc='docker-compose'
 
 alias g='git'
-alias gs='git status -sb'
+# Enhanced git status (colored + grouped)
+function gs() {
+	_in_git_repo || { echo "not a git repo"; return 1; }
+	local colored raw
+	colored=$(git -c color.status=always status -sb 2>&1) || { echo "$colored"; return 1; }
+	raw=$(git status -sb 2>/dev/null)
+	local -a c_lines=() r_lines=()
+	while IFS= read -r line; do c_lines+=("$line"); done <<< "$colored"
+	while IFS= read -r line; do r_lines+=("$line"); done <<< "$raw"
+
+	local branch="" untracked="" deleted="" modified=""
+	local i
+	for (( i=0; i<${#r_lines[@]}; i++ )); do
+		local r="${r_lines[$i]}" c="${c_lines[$i]}"
+		if [[ "$r" == "##"* ]]; then
+			branch="$c"
+		elif [[ "$r" == "??"* ]]; then
+			untracked+="$c"$'\n'
+		elif [[ "$r" == D* || "$r" == " D"* ]]; then
+			deleted+="$c"$'\n'
+		else
+			modified+="$c"$'\n'
+		fi
+	done
+	[[ -n "$branch" ]] && echo "$branch"
+	local need_sep=false
+	if [[ -n "$untracked" ]]; then
+		printf "%s" "$untracked"
+		need_sep=true
+	fi
+	if [[ -n "$deleted" ]]; then
+		$need_sep && echo ""
+		printf "%s" "$deleted"
+		need_sep=true
+	fi
+	if [[ -n "$modified" ]]; then
+		$need_sep && echo ""
+		printf "%s" "$modified"
+	fi
+}
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
 alias ga='git add'
 alias gc='git commit -m'
 alias gp='git push'
 
-# get current branch in git repo
+# Fast pure-bash check: are we inside a git worktree?
+_in_git_repo() {
+	local dir="$PWD"
+	while [[ -n "$dir" ]]; do
+		[[ -e "$dir/.git" ]] && return 0
+		dir="${dir%/*}"
+	done
+	return 1
+}
+
+# get current branch in git repo (works with worktrees)
 function parse_git_branch() {
-	BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
-	if [ ! "${BRANCH}" == "" ]
-	then
-        echo "[${BRANCH}] "
-	else
-		echo ""
-	fi
+	local dir="$PWD" head
+	while [[ -n "$dir" ]]; do
+		if [[ -f "$dir/.git/HEAD" ]]; then
+			read -r head < "$dir/.git/HEAD"
+			case "$head" in
+				ref:*) echo "[${head#ref: refs/heads/}] " ;;
+				*)     echo "[${head:0:7}] " ;;
+			esac
+			return
+		elif [[ -f "$dir/.git" ]]; then
+			# git worktree/submodule: .git is a file, fall back to git command
+			local branch
+			branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+			[[ -n "$branch" ]] && echo "[$branch] "
+			return
+		fi
+		dir="${dir%/*}"
+	done
 }
 
-function git_branch {
-  local git_status="$(git status 2> /dev/null)"
-  local on_branch="On branch ([^${IFS}]*)"
-  local on_commit="HEAD detached at ([^${IFS}]*)"
-
-  if [[ $git_status =~ $on_branch ]]; then
-    local branch=${BASH_REMATCH[1]}
-    echo "($branch)"
-  elif [[ $git_status =~ $on_commit ]]; then
-    local commit=${BASH_REMATCH[1]}
-    echo "($commit)"
-  fi
-}
-
-export PS1="\[\e]0;\W\a\]\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
+# Tab / window title: show "dir | zellij" when inside Zellij (Ghostty picks this up)
+if [[ -n "${ZELLIJ:-}" ]]; then
+	export PS1="\[\e]0;\W | zellij\a\]\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
+else
+	export PS1="\[\e]0;\W\a\]\n\[\e[34m\]\t\[\e[m\] \[\e[33m\]\W\[\e[m\] \[\e[35m\]\`parse_git_branch\`\[\e[m\]\\n\$ "
+fi
 
 # Enable autocomplete for git:
 if [ -f ~/.git-completion.bash ]; then
   . ~/.git-completion.bash
 fi
 
+# Zellij helpers — nice session names + layout shortcuts
+# Usage:
+#   zlc          → launch "coding" layout, session named after current dir
+#   zlcw         → launch "coding-wt" (worktree + agent) layout
+#   zlt          → launch "terminal" layout
+_zj_launch() {
+	local base="${1:-$(basename "$PWD")}" layout="$2"
+	local name="$base" i=2
+	local sessions
+	sessions=$(zellij list-sessions -n 2>/dev/null)
+	while true; do
+		local line
+		line=$(printf '%s\n' "$sessions" | awk -v n="$name" '$1 == n')
+		if [[ -z "$line" ]]; then
+			break  # name is free
+		elif [[ "$line" == *EXITED* ]]; then
+			zellij delete-session "$name" 2>/dev/null
+			break  # cleaned up dead session, reuse name
+		else
+			name="${base}-${i}"
+			((i++))
+		fi
+	done
+	zellij -s "$name" --new-session-with-layout "$layout"
+}
+
+# Zellij layouts
+zlc()  { _zj_launch "$1" coding; }
+zlt()  { _zj_launch "$1" terminal; }
+zlcw() { _zj_launch "$1" coding-wt; }
+
 # Add VS Code `code` command to PATH
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
 # Silence Mac terminal zsh message
 export BASH_SILENCE_DEPRECATION_WARNING=1
+
+# Smart nvim wrapper for Zellij layouts.
+# Prefers the stable /tmp/nvim-zellij.sock (used by coding layouts),
+# then falls back to a per-session socket so multiple Zellij sessions
+# don't fight over the same nvim server.
+nvim() {
+	local sock
+	for sock in "/tmp/nvim-zellij.sock" "/tmp/nvim-${ZELLIJ_SESSION_NAME:-main}.sock"; do
+		if [[ -S "$sock" ]] && command nvim --server "$sock" --remote-expr '1' &>/dev/null; then
+			command nvim --server "$sock" --remote "$@"
+			return
+		fi
+	done
+	# No existing server — start one (prefer layout socket when possible)
+	sock="/tmp/nvim-${ZELLIJ_SESSION_NAME:-main}.sock"
+	rm -f "$sock"
+	command nvim --listen "$sock" "$@"
+}
 
 
 # Run `gcm` to commit changes with an AI-generated commit message by Andrej Karpathy: https://gist.github.com/karpathy/1dd0294ef9567971c1e4348a90d69285
