@@ -1,0 +1,18 @@
+layout {
+    pane split_direction="vertical" size="100%" {
+        pane size="45%" name="Editor" focus=true {
+            command "bash"
+            args "${ZELLIJ_CONFIG_DIR}/scripts/wt-pane.sh" "nvim"
+        }
+
+        pane size="35%" name="Agent" {
+            command "bash"
+            args "${ZELLIJ_CONFIG_DIR}/scripts/wt-pane.sh" "agent"
+        }
+
+        pane size="20%" name="Terminal" {
+            command "bash"
+            args "${ZELLIJ_CONFIG_DIR}/scripts/wt-pane.sh" "terminal"
+        }
+    }
+}

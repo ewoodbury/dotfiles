@@ -1,0 +1,20 @@
+layout {
+    pane split_direction="vertical" size="100%" {
+        pane size="25%" name="Editor" focus=true {
+            command "bash"
+            args "-c" "rm -f /tmp/nvim-zellij.sock && exec nvim --listen /tmp/nvim-zellij.sock"
+        }
+
+        pane size="25%" split_direction="horizontal" {
+            pane size="50%" name="Term1a"
+            pane size="50%" name="Term1b"
+        }
+
+        pane size="25%" split_direction="horizontal" {
+            pane size="50%" name="Term2a"
+            pane size="50%" name="Term2b"
+        }
+
+        pane size="25%" name="Term3"
+    }
+}
