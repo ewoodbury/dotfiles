@@ -7,6 +7,10 @@ alias k='kubectl'
 alias d='docker'
 alias dc='docker-compose'
 
+# User-local binaries (gh, zellij, nvim, agent, ...)
+export PATH="$HOME/.local/bin:$PATH"
+export EDITOR=nvim VISUAL=nvim
+
 alias g='git'
 # Enhanced git status (colored + grouped)
 function gs() {
@@ -102,6 +106,8 @@ fi
 #   zlc          → launch "coding" layout, session named after current dir
 #   zlcw         → launch "coding-wt" (worktree + agent) layout
 #   zlt          → launch "terminal" layout
+#   z2 / z3      → launch "z2" / "z3" side-by-side panes (full height)
+# All take an optional session-name argument.
 _zj_launch() {
 	local base="${1:-$(basename "$PWD")}" layout="$2"
 	local name="$base" i=2
@@ -127,12 +133,8 @@ _zj_launch() {
 zlc()  { _zj_launch "$1" coding; }
 zlt()  { _zj_launch "$1" terminal; }
 zlcw() { _zj_launch "$1" coding-wt; }
-
-# Add VS Code `code` command to PATH
-export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-
-# Silence Mac terminal zsh message
-export BASH_SILENCE_DEPRECATION_WARNING=1
+z2()   { _zj_launch "$1" z2; }
+z3()   { _zj_launch "$1" z3; }
 
 # Smart nvim wrapper for Zellij layouts.
 # Prefers the stable /tmp/nvim-zellij.sock (used by coding layouts),
